@@ -1,0 +1,14 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "forage-backend"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1mazker9s7kie"
+s3_prefix = "forage-backend"
+region = "us-east-1"
+profile = "adamDevForage"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+disable_rollback = true
+parameter_overrides = "EnvironmentParameter=\"dev\""
+image_repositories = []

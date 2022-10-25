@@ -1,0 +1,28 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: SAM Template for Forage Tools Infrastructure
+
+Parameters:
+
+  EnvironmentParameter:
+    Type: String
+    Description: "Name of deployment environment"
+    Default: dev
+
+Resources:
+
+  ProcessJobSubscriptionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref EnvironmentParameter, ProcessJobSubscription ] ]
+      CodeUri: src/functions/process_job_subscription
+      Handler: handler.handler
+      Runtime: python3.8
+
+  TriggerApifyScrapper:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref EnvironmentParameter, TriggerApifyScrapper ] ]
+      CodeUri: src/functions/trigger_apify_scraper
+      Handler: handler.handler
+      Runtime: python3.8
