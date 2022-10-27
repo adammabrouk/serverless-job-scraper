@@ -9,6 +9,10 @@ Parameters:
     Description: "Name of deployment environment"
     Default: dev
 
+  ApifyWebhookUrl:
+    Type: String
+    Description: "URL Of the webhook used to send data to Apify"
+
 Resources:
 
 # ----------------------------------------
@@ -63,8 +67,19 @@ Resources:
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Ref UserJobSubscriptionsTable
-      - DynamoDBCrudPolicy:
-          TableName: !Ref UserReportsTable
+      - S3CrudPolicy:
+          BucketName: !Ref UserReportsBucket
+      Environment:
+        Variables:
+          JOBS_TABLE_NAME: !Ref UserJobSubscriptionsTable
+          APIFY_WEBHOOK_URL: !Ref ApifyWebhookUrl
+          USER_REPORTS_S3_BUCKET: !Ref UserReportsBucket
+
+      Events:
+        ScrapeFromGoogleJobsEvent:
+          Type: Schedule
+          Properties:
+            Schedule: rate(5 minutes) # TODO : change this value when schedule time has been defined
 
 # ----------------------------------------
 #             DynamoDBTables
@@ -105,3 +120,51 @@ Resources:
       BillingMode: PAY_PER_REQUEST
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+
+# ----------------------------------------
+#               SNS Topics
+# ----------------------------------------
+
+  UploadedReportsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Join [ "-", [ !Ref EnvironmentParameter, user-report-upload-topic ] ]
+
+# ----------------------------------------
+#               S3 Buckets
+# ----------------------------------------
+
+  UserReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Join [ "-", [ !Ref EnvironmentParameter, user-reports-bucket ] ]
+      CorsConfiguration:
+        CorsRules:
+          - AllowedMethods:
+              - GET
+              - HEAD
+              - POST
+              - PUT
+            AllowedOrigins:
+              - "*"
+            AllowedHeaders:
+              - "*"
+      AccessControl: Private
+      NotificationConfiguration:
+        TopicConfigurations:
+          - Topic: !Ref UploadedReportsTopic
+            Event: s3:ObjectCreated:*
+
+  BucketToSNSPermission:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: s3.amazonaws.com
+            Action: sns:Publish
+            Resource: !Ref UploadedReportsTopic
+      Topics:
+        - !Ref UploadedReportsTopic

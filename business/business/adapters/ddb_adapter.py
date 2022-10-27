@@ -1,7 +1,8 @@
 import os
 import boto3
+import botocore
 import logging
-
+from typing import List
 
 log_level = os.environ.get("LOG_LEVEL", "INFO")
 logging.root.setLevel(logging.getLevelName(log_level))
@@ -21,5 +22,24 @@ class AmazonDynamoDbAdapter:
         except Exception as e:
             logger.error(
                 f"An Error occured while trying to save the item {item} : {e}"
+            )
+            raise e
+    
+    def scan(self, table: str) -> List:
+        dynamodb_table = self.dynamodb_resource.Table(table)
+        
+        try:
+            records = dynamodb_table.scan()
+            data = records.get("Items", [])
+            while "LastEvaluatedKey" in records:
+                records = dynamodb_table.scan(
+                    ExclusiveStartKey=records["LastEvaluatedKey"]
+                )
+                data.extend(records.get("Items", []))
+            return data
+
+        except botocore.exceptions.ClientError as e:
+            logger.error(
+                f"An Error occured while trying to scan items from table {table}"
             )
             raise e

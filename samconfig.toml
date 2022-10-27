@@ -10,5 +10,5 @@ profile = "adamDevForage"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
-parameter_overrides = "EnvironmentParameter=\"dev\""
+parameter_overrides = "EnvironmentParameter=\"dev\" ApifyWebhookUrl=\"<INPUT_YOUR_APIFY_URL>\""
 image_repositories = []
