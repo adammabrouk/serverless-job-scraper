@@ -11,6 +11,28 @@ Parameters:
 
 Resources:
 
+# ----------------------------------------
+#               SQS Queues    
+# ----------------------------------------
+
+  JobSubscriptionsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${EnvironmentParameter}-job-subscriptions
+      DelaySeconds: 0
+      RedrivePolicy: 
+        deadLetterTargetArn: !GetAtt JobSubscriptionsDeadLetterQueue.Arn
+        maxReceiveCount: 1
+
+  JobSubscriptionsDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${EnvironmentParameter}-job-subscriptions-dlq        
+
+# ----------------------------------------
+#            Lambda Functions    
+# ----------------------------------------
+
   ProcessJobSubscriptionFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -18,6 +40,18 @@ Resources:
       CodeUri: src/functions/process_job_subscription
       Handler: handler.handler
       Runtime: python3.8
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserJobSubscriptionsTable # CRUD permission
+      Environment:
+        Variables:
+          JOBS_TABLE_NAME: !Ref UserJobSubscriptionsTable
+      Events:
+        JobSqsEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt JobSubscriptionsQueue.Arn
+            BatchSize: 1
 
   TriggerApifyScrapper:
     Type: AWS::Serverless::Function
@@ -26,3 +60,48 @@ Resources:
       CodeUri: src/functions/trigger_apify_scraper
       Handler: handler.handler
       Runtime: python3.8
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserJobSubscriptionsTable
+      - DynamoDBCrudPolicy:
+          TableName: !Ref UserReportsTable
+
+# ----------------------------------------
+#             DynamoDBTables
+# ----------------------------------------
+
+  UserJobSubscriptionsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${EnvironmentParameter}-UserJobSubscriptions
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: subscription_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+        - AttributeName: subscription_id
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+
+  UserReportsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${EnvironmentParameter}-UserReports
+      AttributeDefinitions:
+        - AttributeName: username
+          AttributeType: S
+        - AttributeName: report_key
+          AttributeType: S
+      KeySchema:
+        - AttributeName: username
+          KeyType: HASH
+        - AttributeName: report_key
+          KeyType: RANGE
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true

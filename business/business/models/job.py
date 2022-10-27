@@ -6,7 +6,8 @@ from dataclasses import dataclass, field
 
 @dataclass
 class JobSubscription:
-    uuid: str
+    username: str
+    subscription_id: str
     email: str
     location: str
     keywords: List[str] = field(default_factory=list)
@@ -16,7 +17,8 @@ class JobSubscription:
     def from_sqs(message):
         message = json.loads(message) if type(message) == str else message
         return JobSubscription(
-            uuid=str(uuid4()),
+            username=message.get("username", str(uuid4())),
+            subscription_id=str(uuid4()),
             email=message.get("email-1"),
             location=", ".join(
                 [

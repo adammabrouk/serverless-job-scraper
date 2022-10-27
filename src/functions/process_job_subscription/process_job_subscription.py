@@ -1,10 +1,10 @@
 import os
 import logging
 from dataclasses import asdict
-from business.business.adapters.ddb_adapter import (
+from business.adapters.ddb_adapter import (
     AmazonDynamoDbAdapter,
 )
-from business.business.models.job import (
+from business.models.job import (
     JobSubscription,
 )
 

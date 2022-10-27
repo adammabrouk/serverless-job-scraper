@@ -1,0 +1,6 @@
+.vscode/
+.aws-sam/
+packaged.yaml
+__pycache__
+*.egg-info/
+*.egg

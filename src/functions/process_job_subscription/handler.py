@@ -2,8 +2,8 @@ import os
 import json
 import logging
 from dataclasses import asdict
-from business.business.adapters.ddb_adapter import AmazonDynamoDbAdapter
-from business.business.models.job import JobSubscription
+from business.adapters.ddb_adapter import AmazonDynamoDbAdapter
+from business.models.job import JobSubscription
 from process_job_subscription import process_job_subscription
 
 log_level = os.environ.get("LOG_LEVEL", "INFO")
