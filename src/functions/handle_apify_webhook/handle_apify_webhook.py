@@ -17,6 +17,7 @@ def handle_apify_webhook(
         a_client.run(run_id)
         .key_value_store()
         .get_record("INPUT")
+        .get("value")
         .get("s3_object_key")
     )
     # Download the Export ( As Binary )
