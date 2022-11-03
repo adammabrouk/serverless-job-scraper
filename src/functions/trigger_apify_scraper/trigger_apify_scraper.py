@@ -13,11 +13,8 @@ logger = logging.getLogger(__name__)
 
 def trigger_apify_scraper(
     db_adapter: AmazonDynamoDbAdapter,
-    s3_adapter: AmazonS3Adapter,
     jobs_table_name: str,
-    apify_webhook_url: str,
-    user_reports_s3_bucket: str,
-    presigned_url_expiration_time: int,
+    apify_webhook_url: str
 ):
     logger.info("Triggered")
     # Scan all Job Subscriptions
@@ -43,20 +40,13 @@ def trigger_apify_scraper(
             f"private/{username}/{subscription_id}_{date_of_extraction}_.csv"
         )
 
-        presigned_upload_data = s3_adapter.create_presigned_url(
-            bucket_name=user_reports_s3_bucket,
-            object_name=object_name,
-            expiration_time=presigned_url_expiration_time,
-        )
-
-        logger.info(f"Presigned URL : {presigned_upload_data}")
         
         data_to_send = {
             "url" : job_search_url,
-            "presigned_upload_data" : presigned_upload_data
+            "s3_object_key" : object_name
         } 
 
-        # requests.post(
-        #     url=apify_webhook_url,
-        #     data=data_to_send
-        # )
+        requests.post(
+            url=apify_webhook_url,
+            json=data_to_send
+        )

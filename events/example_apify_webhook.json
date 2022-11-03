@@ -1,0 +1,65 @@
+{
+    "userId": "QRHozPnoPH9s8Bsk8",
+    "createdAt": "2022-11-02T23:57:30.544Z",
+    "eventType": "ACTOR.RUN.SUCCEEDED",
+    "eventData": {
+        "actorId": "b4ergPcKfg2wD7VS9",
+        "actorRunId": "6c5j64QOyVfvy8fYR"
+    },
+    "resource": {
+        "id": "6c5j64QOyVfvy8fYR",
+        "actId": "b4ergPcKfg2wD7VS9",
+        "userId": "QRHozPnoPH9s8Bsk8",
+        "startedAt": "2022-11-02T23:54:26.696Z",
+        "finishedAt": "2022-11-02T23:57:27.380Z",
+        "status": "SUCCEEDED",
+        "meta": {
+            "origin": "WEB",
+            "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36"
+        },
+        "stats": {
+            "inputBodyLen": 99,
+            "restartCount": 0,
+            "durationMillis": 180543,
+            "resurrectCount": 0,
+            "runTimeSecs": 180.543,
+            "metamorph": 0,
+            "computeUnits": 0.025075416666666666,
+            "memAvgBytes": 288838593.46927696,
+            "memMaxBytes": 355016704,
+            "memCurrentBytes": 146563072,
+            "cpuAvgUsage": 12.22833367915745,
+            "cpuMaxUsage": 77.07969836978131,
+            "cpuCurrentUsage": 11.415737753753753,
+            "netRxBytes": 1370068,
+            "netTxBytes": 186230
+        },
+        "options": {
+            "build": "latest",
+            "timeoutSecs": 3600,
+            "memoryMbytes": 512,
+            "diskMbytes": 1024
+        },
+        "buildId": "MkXyQ1zJ48zvE4uy9",
+        "exitCode": 0,
+        "defaultKeyValueStoreId": "5XTF5xZJoITcidnFL",
+        "defaultDatasetId": "fKcr2HAU1tCjkeIcY",
+        "defaultRequestQueueId": "2x07r1Z0hesRWdK7r",
+        "buildNumber": "0.0.13",
+        "containerUrl": "https://ooyld3d8javs.runs.apify.net",
+        "usage": {
+            "ACTOR_COMPUTE_UNITS": 0.025075416666666666,
+            "DATASET_READS": 0,
+            "DATASET_WRITES": 8,
+            "KEY_VALUE_STORE_READS": 1,
+            "KEY_VALUE_STORE_WRITES": 7,
+            "KEY_VALUE_STORE_LISTS": 0,
+            "REQUEST_QUEUE_READS": 15,
+            "REQUEST_QUEUE_WRITES": 2,
+            "DATA_TRANSFER_INTERNAL_GBYTES": 0.00012474879622459412,
+            "DATA_TRANSFER_EXTERNAL_GBYTES": 0.0001257834956049919,
+            "PROXY_RESIDENTIAL_TRANSFER_GBYTES": 0,
+            "PROXY_SERPS": 0
+        }
+    }
+}

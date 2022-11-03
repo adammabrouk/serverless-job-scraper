@@ -9,53 +9,19 @@ Parameters:
     Description: "Name of deployment environment"
     Default: dev
 
-  ApifyWebhookUrl:
+  ApifyToken:
+    Type: String
+    Description: "Programatic Token used in Apify"
+
+  ApifyInputWebhookUrl:
     Type: String
     Description: "URL Of the webhook used to send data to Apify"
 
-Resources:
-
-# ----------------------------------------
-#               SQS Queues    
-# ----------------------------------------
-
-  JobSubscriptionsQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub ${EnvironmentParameter}-job-subscriptions
-      DelaySeconds: 0
-      RedrivePolicy: 
-        deadLetterTargetArn: !GetAtt JobSubscriptionsDeadLetterQueue.Arn
-        maxReceiveCount: 1
-
-  JobSubscriptionsDeadLetterQueue:
-    Type: AWS::SQS::Queue
-    Properties:
-      QueueName: !Sub ${EnvironmentParameter}-job-subscriptions-dlq        
+Resources:    
 
 # ----------------------------------------
 #            Lambda Functions    
 # ----------------------------------------
-
-  ProcessJobSubscriptionFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: !Join [ "-", [ !Ref EnvironmentParameter, ProcessJobSubscription ] ]
-      CodeUri: src/functions/process_job_subscription
-      Handler: handler.handler
-      Runtime: python3.8
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Ref UserJobSubscriptionsTable # CRUD permission
-      Environment:
-        Variables:
-          JOBS_TABLE_NAME: !Ref UserJobSubscriptionsTable
-      Events:
-        JobSqsEvent:
-          Type: SQS
-          Properties:
-            Queue: !GetAtt JobSubscriptionsQueue.Arn
-            BatchSize: 1
 
   TriggerApifyScrapper:
     Type: AWS::Serverless::Function
@@ -72,14 +38,29 @@ Resources:
       Environment:
         Variables:
           JOBS_TABLE_NAME: !Ref UserJobSubscriptionsTable
-          APIFY_WEBHOOK_URL: !Ref ApifyWebhookUrl
+          APIFY_WEBHOOK_URL: !Ref ApifyInputWebhookUrl
           USER_REPORTS_S3_BUCKET: !Ref UserReportsBucket
 
-      Events:
-        ScrapeFromGoogleJobsEvent:
-          Type: Schedule
-          Properties:
-            Schedule: rate(5 minutes) # TODO : change this value when schedule time has been defined
+      # Events:
+      #   ScrapeFromGoogleJobsEvent:
+      #     Type: Schedule
+      #     Properties:
+      #       Schedule: rate(5 minutes) # TODO : change this value when schedule time has been defined
+
+  HandleApifyWebhoook:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join [ "-", [ !Ref EnvironmentParameter, HandleApifyWebhook ] ]
+      CodeUri: src/functions/handle_apify_webhook
+      Handler: handler.handler
+      Runtime: python3.8
+      Policies:
+      - S3CrudPolicy:
+          BucketName: !Ref UserReportsBucket
+      Environment:
+        Variables:
+          APIFY_TOKEN: !Ref ApifyToken
+          USER_REPORTS_S3_BUCKET: !Ref UserReportsBucket
 
 # ----------------------------------------
 #             DynamoDBTables
@@ -103,33 +84,6 @@ Resources:
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
 
-  UserReportsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Sub ${EnvironmentParameter}-UserReports
-      AttributeDefinitions:
-        - AttributeName: username
-          AttributeType: S
-        - AttributeName: report_key
-          AttributeType: S
-      KeySchema:
-        - AttributeName: username
-          KeyType: HASH
-        - AttributeName: report_key
-          KeyType: RANGE
-      BillingMode: PAY_PER_REQUEST
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
-
-# ----------------------------------------
-#               SNS Topics
-# ----------------------------------------
-
-  UploadedReportsTopic:
-    Type: AWS::SNS::Topic
-    Properties:
-      TopicName: !Join [ "-", [ !Ref EnvironmentParameter, user-report-upload-topic ] ]
-
 # ----------------------------------------
 #               S3 Buckets
 # ----------------------------------------
@@ -150,21 +104,3 @@ Resources:
             AllowedHeaders:
               - "*"
       AccessControl: Private
-      NotificationConfiguration:
-        TopicConfigurations:
-          - Topic: !Ref UploadedReportsTopic
-            Event: s3:ObjectCreated:*
-
-  BucketToSNSPermission:
-    Type: AWS::SNS::TopicPolicy
-    Properties:
-      PolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service: s3.amazonaws.com
-            Action: sns:Publish
-            Resource: !Ref UploadedReportsTopic
-      Topics:
-        - !Ref UploadedReportsTopic

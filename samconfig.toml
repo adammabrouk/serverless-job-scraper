@@ -10,5 +10,5 @@ profile = "adamDevForage"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
-parameter_overrides = "EnvironmentParameter=\"dev\" ApifyWebhookUrl=\"<INPUT_YOUR_APIFY_URL>\""
+parameter_overrides = "EnvironmentParameter=\"dev\" ApifyToken=\"apify_api_GKdz79oksi7mRjA6ah2a0eFkoddLs40iqfZI\" ApifyInputWebhookUrl=\"https://hooks.zapier.com/hooks/catch/13591535/bx1r9ma/\""
 image_repositories = []

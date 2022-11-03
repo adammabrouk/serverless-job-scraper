@@ -1,4 +1,5 @@
 import os
+import io
 import boto3
 import botocore
 import logging
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 class AmazonS3Adapter:
     def __init__(self):
         self.s3_client = boto3.client("s3")
+        self.s3_resource = boto3.resource("s3")
 
     def create_presigned_url(
         self,
@@ -28,3 +30,12 @@ class AmazonS3Adapter:
 
         # The response contains the presigned URL
         return response
+
+    def upload_binary_object(
+        self, bucket_name: str, object_name: str, object_binary: io.BytesIO
+    ):
+        # Get bucket object
+        boto_test_bucket = self.s3_resource.Bucket(bucket_name)
+
+        # Upload the binary stream.
+        boto_test_bucket.upload_fileobj(object_binary, object_name)
