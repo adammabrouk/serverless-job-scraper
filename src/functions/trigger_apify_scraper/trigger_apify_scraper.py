@@ -37,7 +37,7 @@ def trigger_apify_scraper(
             datetime.now().date().strftime("%Y-%m-%d"),
         )
         object_name = (
-            f"private/{username}/{subscription_id}_{date_of_extraction}_.csv"
+            f"private/{username}/results/{subscription_id}_{date_of_extraction}_.csv"
         )
 
         
