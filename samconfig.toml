@@ -2,9 +2,9 @@ version = 0.1
 [default]
 [default.deploy]
 [default.deploy.parameters]
-stack_name = "forage-backend"
+stack_name = "job-scraper-backend"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-1mazker9s7kie"
-s3_prefix = "forage-backend"
+s3_prefix = "job-scraper-backend"
 region = "us-east-1"
 profile = "adamDevForage"
 confirm_changeset = true
